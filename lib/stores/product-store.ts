@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { Product, products as dummyProducts } from '@/lib/data'
+import { products as dummyProducts } from '@/lib/data'
+import { Product } from '@/lib/types'
 
 interface ProductFilters {
   category?: string

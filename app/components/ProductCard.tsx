@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Heart, Search, ShoppingCart } from 'lucide-react'
 import { useCartStore } from '@/lib/stores/cart-store'
 import { useWishlistStore } from '@/lib/stores/wishlist-store'
-import { Product } from '@/lib/data'
+import { Product } from '@/lib/types'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -35,9 +35,7 @@ export default function ProductCard({ product, showCompare = false }: ProductCar
     if (isWishlisted) {
       removeFromWishlist(product.id)
     } else {
-      addToWishlist({
-        ...product
-      })
+      addToWishlist(product)
     }
   }
 
