@@ -1,145 +1,333 @@
 'use client'
 
+import { useState, useEffect, useRef } from 'react'
 import Link from "next/link";
 import Image from "next/image";
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
 import { useProductStore } from '@/lib/stores/product-store'
 import ProductCard from './components/ProductCard'
+import HeroSlider from './components/HeroSlider'
+import { ArrowRight, TrendingUp, Truck, Clock, ThumbsUp, Gift } from 'lucide-react'
+
+const categories = [
+  {
+    name: 'Living Room',
+    bgGradient: 'bg-gradient-to-r from-amber-600 to-amber-800',
+    link: '/shop?category=living-room',
+    icon: '🛋️'
+  },
+  {
+    name: 'Bedroom',
+    bgGradient: 'bg-gradient-to-r from-blue-700 to-blue-900',
+    link: '/shop?category=bedroom',
+    icon: '🛏️'
+  },
+  {
+    name: 'Dining',
+    bgGradient: 'bg-gradient-to-r from-green-700 to-green-900',
+    link: '/shop?category=dining',
+    icon: '🍽️'
+  },
+  {
+    name: 'Office',
+    bgGradient: 'bg-gradient-to-r from-purple-700 to-purple-900',
+    link: '/shop?category=office',
+    icon: '💼'
+  },
+  {
+    name: 'Kitchen',
+    bgGradient: 'bg-gradient-to-r from-red-700 to-red-900',
+    link: '/shop?category=kitchen',
+    icon: '🍳'
+  },
+  {
+    name: 'Outdoor',
+    bgGradient: 'bg-gradient-to-r from-gray-700 to-gray-900',
+    link: '/shop?category=outdoor',
+    icon: '🌳'
+  }
+]
+
+const trending = [
+  "Minimalist Furniture",
+  "Sustainable Materials",
+  "Modular Designs",
+  "Scandinavian Style"
+]
 
 export default function Home() {
   const { products } = useProductStore()
   const featuredProducts = products.slice(0, 8) // Show first 8 products
+  const [trendingIndex, setTrendingIndex] = useState(0)
+  const [email, setEmail] = useState('')
+  
+  // Refs for scroll animations
+  const categoriesRef = useRef(null)
+  const productsRef = useRef(null)
+  const featuresRef = useRef(null)
+  const subscribeRef = useRef(null)
+  
+  const categoriesInView = useInView(categoriesRef, { once: true, amount: 0.3 })
+  const productsInView = useInView(productsRef, { once: true, amount: 0.2 })
+  const featuresInView = useInView(featuresRef, { once: true, amount: 0.3 })
+  const subscribeInView = useInView(subscribeRef, { once: true, amount: 0.5 })
+
+  // Auto-rotate trending searches
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTrendingIndex((prev) => (prev + 1) % trending.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    // Here you would typically call an API to handle the subscription
+    alert(`Thanks for subscribing with ${email}!`)
+    setEmail('')
+  }
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  }
 
   return (
     <main>
-      {/* Hero Section */}
-      <section className="relative h-[600px] bg-[#FCF8F3] flex items-center">
+      {/* Hero Slider */}
+      <HeroSlider />
+
+      {/* Trending Searches */}
+      <div className="bg-gray-100 py-2">
         <div className="container mx-auto px-4">
-          <div className="max-w-xl">
-            <span className="text-lg">New Arrival</span>
-            <h1 className="text-5xl font-bold mt-4 mb-6">
-              Discover Our New Collection
-            </h1>
-            <p className="text-gray-600 mb-8">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit
-              tellus, luctus nec ullamcorper mattis.
-            </p>
-            <Link
-              href="/shop"
-              className="inline-block bg-[#B88E2F] text-white px-8 py-3 rounded-lg hover:bg-[#A17922] transition-colors"
+          <div className="flex items-center">
+            <TrendingUp className="w-4 h-4 mr-2 text-[#B88E2F]" />
+            <span className="text-sm font-medium mr-2">Trending:</span>
+            <motion.span 
+              key={trendingIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5 }}
+              className="text-sm text-gray-600"
             >
-              BUY NOW
-            </Link>
+              {trending[trendingIndex]}
+            </motion.span>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Categories Section */}
-      <section className="py-16">
+      <section className="py-16" ref={categoriesRef}>
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-semibold text-center mb-12">Browse The Range</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['Dining', 'Living', 'Bedroom'].map((category) => (
-              <Link key={category} href={`/shop?category=${category.toLowerCase()}`}>
-                <div className="group cursor-pointer">
-                  <div className="relative h-[300px] bg-gray-100 rounded-lg overflow-hidden mb-4">
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={categoriesInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <span className="text-[#B88E2F] text-sm uppercase tracking-wider">Discover Our Categories</span>
+            <h2 className="text-3xl font-semibold mt-2">Browse The Range</h2>
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">Find functional furniture for every room in your home. We offer a variety of styles to match any aesthetic.</p>
+          </motion.div>
+          
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate={categoriesInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {categories.map((category, index) => (
+              <motion.div
+                key={category.name}
+                variants={itemVariants}
+                whileHover={{ y: -10, transition: { duration: 0.3 } }}
+              >
+                <Link href={category.link}>
+                  <div className="group cursor-pointer h-full">
+                    <div className={`relative h-[250px] rounded-lg overflow-hidden mb-4 ${category.bgGradient}`}>
+                      {/* Pattern overlay */}
+                      <div className="absolute inset-0 opacity-20" 
+                        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.6' fill-rule='evenodd'/%3E%3C/svg%3E\")" }}>
+                      </div>
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-white bg-opacity-90 px-6 py-4 rounded-lg text-center transform group-hover:scale-110 transition-transform duration-300">
+                          <div className="text-4xl mb-2">{category.icon}</div>
+                          <div className="text-xl font-bold">{category.name}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium">{category.name}</h3>
+                      <span className="text-[#B88E2F] group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center">
+                        Explore <ArrowRight className="w-4 h-4 ml-1" />
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-medium text-center">{category}</h3>
-                </div>
-              </Link>
+                </Link>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Products Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50" ref={productsRef}>
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-semibold text-center mb-12">Our Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={productsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <span className="text-[#B88E2F] text-sm uppercase tracking-wider">Best-selling Products</span>
+            <h2 className="text-3xl font-semibold mt-2">Our Products</h2>
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">Check out our most popular products that customers love. Quality meets design in every piece.</p>
+          </motion.div>
+          
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate={productsInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {featuredProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                variants={itemVariants}
+                whileHover={{ y: -5 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
             ))}
-          </div>
-          <div className="text-center mt-12">
+          </motion.div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={productsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center mt-12"
+          >
             <Link
               href="/shop"
-              className="inline-block border-2 border-[#B88E2F] text-[#B88E2F] px-8 py-3 rounded-lg hover:bg-[#B88E2F] hover:text-white transition-colors"
+              className="inline-flex items-center border-2 border-[#B88E2F] text-[#B88E2F] px-8 py-3 rounded-lg hover:bg-[#B88E2F] hover:text-white transition-colors"
             >
-              Show More
+              Show More Products <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
- {/* Features banner */}
- <div className="py-8 border-t border-gray-200 mt-8">
+      
+      {/* Newsletter Section */}
+      <section className="py-20 bg-gray-100" ref={subscribeRef}>
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-between">
-            <div className="flex items-center mb-4 md:mb-0 w-full md:w-auto">
-              <div className="mr-3">
-                <div className="p-2 rounded-full">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 10V8C21 6.89543 20.1046 6 19 6H12L10 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20H11" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M17 14V17M17 20V17M17 17H14M17 17H20" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium">High Quality</h4>
-                <p className="text-xs text-gray-500">crafted from top materials</p>
-              </div>
-            </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={subscribeInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.8 }}
+            className="bg-white rounded-xl shadow-lg max-w-4xl mx-auto p-10 text-center"
+          >
+            <h2 className="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+            <p className="text-gray-600 mb-8 max-w-lg mx-auto">Stay updated with our latest products, exclusive offers, and interior design tips.</p>
             
-            <div className="flex items-center mb-4 md:mb-0 w-full md:w-auto">
-              <div className="mr-3">
-                <div className="p-2 rounded-full">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7.5 12L10.5 15L16.5 9" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium">Warranty Protection</h4>
-                <p className="text-xs text-gray-500">Over 2 years</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center mb-4 md:mb-0 w-full md:w-auto">
-              <div className="mr-3">
-                <div className="p-2 rounded-full">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 14C19 15.6569 17.6569 17 16 17C14.3431 17 13 15.6569 13 14C13 12.3431 14.3431 11 16 11C17.6569 11 19 12.3431 19 14Z" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M9 22L16 17" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M5 14C5 15.6569 6.34315 17 8 17C9.65685 17 11 15.6569 11 14C11 12.3431 9.65685 11 8 11C6.34315 11 5 12.3431 5 14Z" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 2V8L14 6" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium">Free Shipping</h4>
-                <p className="text-xs text-gray-500">Order over 150 $</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center w-full md:w-auto">
-              <div className="mr-3">
-                <div className="p-2 rounded-full">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 12H16L14 15H10L8 12H2" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M5.45 5.11L2 12V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H20C20.5304 20 21.0391 19.7893 21.4142 19.4142C21.7893 19.0391 22 18.5304 22 18V12L18.55 5.11C18.3844 4.77679 18.1292 4.49637 17.813 4.30028C17.4967 4.10419 17.1321 4.0002 16.76 4H7.24C6.86792 4.0002 6.50326 4.10419 6.18704 4.30028C5.87083 4.49637 5.61558 4.77679 5.45 5.11Z" stroke="#121212" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium">24 / 7 Support</h4>
-                <p className="text-xs text-gray-500">Dedicated support</p>
-              </div>
-            </div>
-          </div>
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                className="px-6 py-3 bg-[#B88E2F] text-white rounded-lg hover:bg-[#A17922] transition-colors"
+              >
+                Subscribe
+              </motion.button>
+            </form>
+          </motion.div>
         </div>
-      </div>
-     
+      </section>
+
+      {/* Features banner */}
+      <section className="py-12 border-t border-gray-200" ref={featuresRef}>
+        <div className="container mx-auto px-4">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate={featuresInView ? "visible" : "hidden"}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="bg-amber-100 p-3 rounded-full mr-4">
+                  <ThumbsUp className="w-6 h-6 text-[#B88E2F]" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">High Quality</h4>
+                  <p className="text-sm text-gray-500">Crafted from top materials</p>
+                </div>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="bg-blue-100 p-3 rounded-full mr-4">
+                  <Clock className="w-6 h-6 text-[#B88E2F]" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">Warranty Protection</h4>
+                  <p className="text-sm text-gray-500">Over 2 years</p>
+                </div>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="bg-green-100 p-3 rounded-full mr-4">
+                  <Truck className="w-6 h-6 text-[#B88E2F]" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">Free Shipping</h4>
+                  <p className="text-sm text-gray-500">Order over 150 $</p>
+                </div>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center mb-4">
+                <div className="bg-purple-100 p-3 rounded-full mr-4">
+                  <Gift className="w-6 h-6 text-[#B88E2F]" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">24 / 7 Support</h4>
+                  <p className="text-sm text-gray-500">Dedicated support</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
     </main>
   );
 }
