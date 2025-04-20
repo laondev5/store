@@ -1,6 +1,9 @@
 import { products } from '@/lib/data'
 import ProductDetails from '../../components/ProductDetails'
 import { Metadata } from 'next'
+import Navbar from '../../components/Navbar'
+import Footer from '@/components/ui/Footer'
+
 
 export async function generateMetadata({ 
   params 
@@ -31,5 +34,11 @@ export default function Page({
     )
   }
 
-  return <ProductDetails product={product} />
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <ProductDetails product={product} />
+      <Footer />
+    </div>
+  )
 } 

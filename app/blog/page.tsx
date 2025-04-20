@@ -1,5 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import Navbar from "../components/Navbar";
+import Footer from "@/components/ui/Footer";
+
 
 export default function Blog() {
   // Dummy blog posts data
@@ -81,6 +84,7 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen">
+      <Navbar />
       {/* Page Header */}
       <section className="relative h-[200px] bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -255,6 +259,7 @@ export default function Blog() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 } 

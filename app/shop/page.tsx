@@ -6,6 +6,8 @@ import { useProductStore } from '@/lib/stores/product-store'
 import ProductCard from '@/app/components/ProductCard'
 import { ShopFilter } from '@/app/components/ShopFilter'
 import { Button } from '@/components/ui/button'
+import Navbar from '../components/Navbar'
+import Footer from '@/components/ui/Footer'
 import {
   Select,
   SelectContent,
@@ -44,6 +46,7 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Navbar />
       {/* Hero Section */}
       <div className="relative h-[200px] bg-[#F5F5F5]">
         <div className="container mx-auto px-4 h-full flex flex-col justify-center">
@@ -158,6 +161,7 @@ export default function ShopPage() {
 
       {/* Filter Sheet */}
       <ShopFilter open={filterOpen} onOpenChange={setFilterOpen} />
+      <Footer />
     </div>
   )
 } 

@@ -9,6 +9,8 @@ import { useProductStore } from '@/lib/stores/product-store'
 import ProductCard from './components/ProductCard'
 import HeroSlider from './components/HeroSlider'
 import { ArrowRight, TrendingUp, Truck, Clock, ThumbsUp, Gift } from 'lucide-react'
+import Navbar from './components/Navbar'
+import Footer from '@/components/ui/Footer'
 
 const categories = [
   {
@@ -109,9 +111,11 @@ export default function Home() {
   }
 
   return (
-    <main>
-      {/* Hero Slider */}
-      <HeroSlider />
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main>
+        {/* Hero Slider */}
+        <HeroSlider />
 
       {/* Trending Searches */}
       <div className="bg-gray-100 py-2">
@@ -329,5 +333,7 @@ export default function Home() {
         </div>
       </section>
     </main>
+    <Footer />
+    </div>
   );
 }

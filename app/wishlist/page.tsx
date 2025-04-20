@@ -2,12 +2,14 @@
 
 import { useWishlistStore } from '@/lib/stores/wishlist-store'
 import ProductCard from '../components/ProductCard'
-
+import Navbar from '../components/Navbar'
+import Footer from '@/components/ui/Footer'
 export default function WishlistPage() {
   const { items } = useWishlistStore()
 
   return (
     <div className="min-h-screen bg-white">
+        <Navbar />
       {/* Hero Section */}
       <div className="relative h-[200px] bg-[#F5F5F5]">
         <div className="container mx-auto px-4 h-full flex flex-col justify-center">
@@ -41,6 +43,7 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   )
 } 
