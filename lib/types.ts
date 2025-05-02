@@ -15,4 +15,4 @@ export interface Product {
   tags: string[]
   stock: number
   sku: string
-} 
+}

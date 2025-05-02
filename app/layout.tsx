@@ -1,30 +1,24 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-// import Navbar from "./components/Navbar";
-// import Footer from "@/components/ui/Footer";
+import { Providers } from "./providers";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Furniro - Modern Furniture Store",
-  description: "Discover beautiful furniture for your home",
+  title: "Furniro - Furniture Store",
+  description: "Your one-stop shop for quality furniture",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
-        
-        <main>{children}</main>
-        
+      <body className={inter.className}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

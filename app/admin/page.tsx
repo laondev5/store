@@ -12,6 +12,7 @@ import {
   Package,
   Calendar
 } from 'lucide-react'
+import { prisma } from "@/lib/prisma";
 
 // Fake data for demo
 const recentOrders = [
@@ -63,151 +64,122 @@ function StatCard({ title, value, icon, trend, trendLabel }: StatCardProps) {
   )
 }
 
-export default function AdminDashboard() {
+async function getStats() {
+  const [userCount, productCount, orderCount] = await Promise.all([
+    prisma.user.count(),
+    prisma.product.count(),
+    prisma.order.count(),
+  ]);
+
+  const totalRevenue = await prisma.order.aggregate({
+    _sum: {
+      total: true,
+    },
+  });
+
+  return {
+    userCount,
+    productCount,
+    orderCount,
+    totalRevenue: totalRevenue._sum.total || 0,
+  };
+}
+
+export default async function AdminDashboard() {
+  const stats = await getStats();
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-2">
-          <button className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-            <Calendar size={16} className="inline mr-2" />
-            Last 30 days
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Dashboard Overview</h1>
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          title="Total Revenue" 
-          value="$12,628" 
-          icon={<DollarSign size={20} />} 
-          trend={12.5} 
-          trendLabel="vs. previous month" 
-        />
-        <StatCard 
-          title="Orders" 
-          value="329" 
-          icon={<ShoppingBag size={20} />} 
-          trend={-2.3} 
-          trendLabel="vs. previous month" 
-        />
-        <StatCard 
-          title="Customers" 
-          value="648" 
-          icon={<Users size={20} />} 
-          trend={5.7} 
-          trendLabel="vs. previous month" 
-        />
-        <StatCard 
-          title="Avg. Order Value" 
-          value="$205" 
-          icon={<TrendingUp size={20} />} 
-          trend={3.2} 
-          trendLabel="vs. previous month" 
-        />
-      </div>
-      
-      {/* Tables Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Orders */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-sm text-[#B88E2F] hover:underline">
-              View All
-            </Link>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{order.id}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{order.customer}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{order.date}</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                          order.status === 'Delivered'
-                            ? 'bg-green-100 text-green-800'
-                            : order.status === 'Shipped'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">${order.total}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Users Card */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Users</p>
+              <p className="text-2xl font-semibold mt-1">{stats.userCount}</p>
+            </div>
+            <div className="bg-blue-100 p-3 rounded-full">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
         </div>
-        
-        {/* Top Products */}
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Top Selling Products</h2>
-            <Link href="/admin/products" className="text-sm text-[#B88E2F] hover:underline">
-              View All
-            </Link>
+
+        {/* Products Card */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Products</p>
+              <p className="text-2xl font-semibold mt-1">{stats.productCount}</p>
+            </div>
+            <div className="bg-green-100 p-3 rounded-full">
+              <Package className="w-6 h-6 text-green-600" />
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Units Sold</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {topProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{product.name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-center">{product.sold}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 text-right">${product.revenue.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </div>
+
+        {/* Orders Card */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Orders</p>
+              <p className="text-2xl font-semibold mt-1">{stats.orderCount}</p>
+            </div>
+            <div className="bg-purple-100 p-3 rounded-full">
+              <ShoppingBag className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Revenue Card */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+              <p className="text-2xl font-semibold mt-1">
+                ${stats.totalRevenue.toFixed(2)}
+              </p>
+            </div>
+            <div className="bg-yellow-100 p-3 rounded-full">
+              <DollarSign className="w-6 h-6 text-yellow-600" />
+            </div>
           </div>
         </div>
       </div>
-      
-      {/* Quick Actions */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link href="/admin/products/add">
-          <div className="p-4 bg-[#B88E2F] bg-opacity-10 hover:bg-opacity-20 rounded-md text-[#B88E2F] flex items-center justify-center gap-2 transition-colors">
-            <ShoppingBag size={20} />
-            <span>Add New Product</span>
-          </div>
-        </Link>
-        <Link href="/admin/users/add">
-          <div className="p-4 bg-blue-50 hover:bg-blue-100 rounded-md text-blue-600 flex items-center justify-center gap-2 transition-colors">
-            <Users size={20} />
-            <span>Add New User</span>
-          </div>
-        </Link>
-        <Link href="/admin/orders">
-          <div className="p-4 bg-green-50 hover:bg-green-100 rounded-md text-green-600 flex items-center justify-center gap-2 transition-colors">
-            <Package size={20} />
-            <span>Process Orders</span>
-          </div>
-        </Link>
+
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a
+            href="/admin/products/add"
+            className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold mb-2">Add New Product</h3>
+            <p className="text-gray-600 text-sm">
+              Create and publish a new product listing
+            </p>
+          </a>
+          <a
+            href="/admin/orders"
+            className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold mb-2">Manage Orders</h3>
+            <p className="text-gray-600 text-sm">
+              View and process customer orders
+            </p>
+          </a>
+          <a
+            href="/admin/users"
+            className="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <h3 className="font-semibold mb-2">User Management</h3>
+            <p className="text-gray-600 text-sm">
+              Manage user accounts and permissions
+            </p>
+          </a>
+        </div>
       </div>
     </div>
-  )
-} 
+  );
+}

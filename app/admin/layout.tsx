@@ -19,6 +19,8 @@ import {
   Bell,
   MessageSquare
 } from 'lucide-react'
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 interface SidebarItemProps {
   icon: React.ReactNode
@@ -65,7 +67,7 @@ function SidebarItem({ icon, label, href, active, subItems }: SidebarItemProps) 
               href={item.href}
               className={`block py-2 px-3 rounded-md ${
                 active && pathname === item.href 
-                  ? 'bg-[#B88E2F] bg-opacity-20 text-[#B88E2F]' 
+                  ? 'bg-[#B88E2F] bg-opacity-20 text-[#ffffff]' 
                   : 'text-gray-600 hover:bg-gray-100'
               } text-sm transition-colors`}
             >
@@ -78,11 +80,17 @@ function SidebarItem({ icon, label, href, active, subItems }: SidebarItemProps) 
   )
 }
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const user = await getCurrentUser();
+
+  if (!user || user.role !== "ADMIN") {
+    redirect("/auth/signin");
+  }
+
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const pathname = usePathname()
   
@@ -247,4 +255,4 @@ export default function AdminLayout({
       </main>
     </div>
   )
-} 
+}
